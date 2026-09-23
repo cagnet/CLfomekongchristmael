@@ -9,13 +9,13 @@ public sealed class OrderService(ICustomerRepository customers, IOrderRepository
     public IReadOnlyCollection<Order> ReadAll() => orders.GetAll();
     public Order? ReadOne(int id) => orders.GetById(id);
 
-    public Order? Create(int customerId, decimal amount)
+    public Order Create(int customerId, decimal amount)
     {
         var customer = customers.GetById(customerId);
-        if (customer is null) return null;
+        if (customer is null) 
+            throw new CustomerNotFoundException(customerId);
         if (!customer.IsActive)
-            throw new BusinessRuleException("inactive_customer", "An order cannot be created for an inactive customer.");
-        if (amount <= 0) throw new ArgumentOutOfRangeException(nameof(amount), "Amount must be greater than zero.");
+            throw new InactiveCustomerException("An order cannot be created for an inactive customer.");
         return orders.Add(customerId, amount, DateTime.UtcNow);
     }
 

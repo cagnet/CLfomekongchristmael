@@ -1,3 +1,4 @@
+using CustomerOrders.Api.Middlewares;
 using CustomerOrders.Business.Repositories;
 using CustomerOrders.Business.Services;
 using CustomerOrders.Data.InMemory;
@@ -16,6 +17,8 @@ builder.Services.AddSingleton<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<CustomerService>();
 builder.Services.AddScoped<OrderService>();
 var app = builder.Build();
+
+app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {

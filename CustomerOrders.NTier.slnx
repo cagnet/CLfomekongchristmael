@@ -3,5 +3,6 @@
     <Project Path="src/CustomerOrders.Api/CustomerOrders.Api.csproj" />
     <Project Path="src/CustomerOrders.Business/CustomerOrders.Business.csproj" />
     <Project Path="src/CustomerOrders.Data/CustomerOrders.Data.csproj" />
+    <Project Path="src/Tests/CustomerOrders.Api.Tests/CustomerOrders.Api.Tests.csproj" />
   </Folder>
 </Solution>
