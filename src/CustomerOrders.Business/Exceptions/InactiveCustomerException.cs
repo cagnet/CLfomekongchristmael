@@ -1,7 +1,7 @@
 namespace CustomerOrders.Business.Exceptions;
 
-public class InactiveCustomerException(): 
-    BusinessRuleException("inactive_customer", "An order cannot be created for an inactive customer.")
+public class InactiveCustomerException(String message): 
+    BusinessRuleException(BusinessRuleCodes.InactiveCustomer, message)
 {
-    
+    public InactiveCustomerException() : this("Customer is inactive"){}
 }

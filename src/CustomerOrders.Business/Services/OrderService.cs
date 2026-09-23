@@ -15,7 +15,7 @@ public sealed class OrderService(ICustomerRepository customers, IOrderRepository
         if (customer is null) 
             throw new CustomerNotFoundException(customerId);
         if (!customer.IsActive)
-            throw new InactiveCustomerException();
+            throw new InactiveCustomerException("An order cannot be created for an inactive customer.");
         return orders.Add(customerId, amount, DateTime.UtcNow);
     }
 
