@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using CustomerOrders.Business.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -47,16 +48,10 @@ public class OrderControllerTests(WebApplicationFactory<Program> webApplicationF
     public async Task CreateOrder_WhenCustomerIsInative_Return400BadRequest()
     {
         // Let avoid mocking data for the moment
-        var createCustomerRes = await _httpClient.PostAsJsonAsync("/customers", new
-        {
-            Name = "Mael",
-            IsActive = false
-        });
-     
-        Assert.Equal(HttpStatusCode.Created, createCustomerRes.StatusCode);
+        int id = await CreateCustomer("Mael", false);
         
         
-        var response = await _httpClient.PostAsJsonAsync("/customers/1/orders", new
+        var response = await _httpClient.PostAsJsonAsync($"/customers/{id}/orders", new
         {
             Amount = 10
         });
@@ -66,5 +61,32 @@ public class OrderControllerTests(WebApplicationFactory<Program> webApplicationF
         Assert.NotNull(body);
         
         Assert.Equal(BusinessRuleCodes.InactiveCustomer, body["code"]);
+    }
+
+    [Fact]
+    public async Task CreateOrder_WhenCustomerIsActiveAndRequestIsValid_Return201Created()
+    {
+        int id = await CreateCustomer("Christ", true);
+        var response = await _httpClient.PostAsJsonAsync($"/customers/{id}/orders", new
+        {
+            Amount = 10
+        });
+        
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+    }
+
+
+    private async Task<int> CreateCustomer(String name, bool isActive)
+    {
+        var createCustomerRes = await _httpClient.PostAsJsonAsync("/customers", new
+        {
+            Name = name,
+            IsActive = isActive
+        });
+        Assert.Equal(HttpStatusCode.Created, createCustomerRes.StatusCode);
+        var body = await createCustomerRes.Content.ReadAsStringAsync();
+        var rootElement = JsonDocument.Parse(body).RootElement;
+        return rootElement.GetProperty("id").GetInt32();
+
     }
 }
