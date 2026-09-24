@@ -1,0 +1,55 @@
+<div class="navbar bg-base-100 shadow-sm">
+  <a class="btn btn-ghost text-xl">Orders</a>
+</div>
+
+@if(orderListState().status == ResultState.pending){
+  <p>It is loading...</p>
+}
+@else if (orderListState().status == ResultState.success && orderListState().data.length == 0){
+  <div class="flex flex-col items-center justify-center p-16">
+    <h3>No order available</h3>
+  </div>
+}
+@else{
+
+  <div class="overflow-x-auto">
+    <table class="table">
+      <!-- head -->
+      <thead>
+      <tr>
+        <th>Customer ID</th>
+        <th>Amount</th>
+        <th>Created At</th>
+        <th>Action</th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+        @for(o of orderListState().data; track o.id){
+          <tr>
+            <td>
+              <div class="flex items-center gap-3">
+                <div>
+                  <div class="font-bold">{{ o.customerId }}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              {{ o.amount | currency:"XAF" }}
+            </td>
+            <td>{{ o.createdAt | date }}</td>
+
+            <th>
+              <button>See More</button>
+            </th>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+
+}
+
+
+
