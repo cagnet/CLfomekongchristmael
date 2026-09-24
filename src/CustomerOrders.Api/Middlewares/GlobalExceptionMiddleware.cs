@@ -16,6 +16,9 @@ public class GlobalExceptionMiddleware(RequestDelegate next)
         {
             switch (e)
             {
+                case BusinessConflictException ex:
+                    await HandleBusinessConflictException(ex, context); 
+                    break;
                 case BusinessRuleException ex:
                     await HandleBusinessRuleException(ex, context); 
                     break;
@@ -34,6 +37,12 @@ public class GlobalExceptionMiddleware(RequestDelegate next)
         return context.Response.WriteAsJsonAsync(new Problem(ex.Code, ex.Message));
     }
 
+    private Task HandleBusinessConflictException(BusinessRuleException ex, HttpContext context)
+    {
+        context.Response.StatusCode = StatusCodes.Status409Conflict;
+        return context.Response.WriteAsJsonAsync(new Problem(ex.Code, ex.Message));
+    }
+    
     private Task HandleUnknowException(Exception ex, HttpContext context, ILogger<GlobalExceptionMiddleware> logger)
     {
         logger.LogError(ex, "@ An unexpected error occurs");

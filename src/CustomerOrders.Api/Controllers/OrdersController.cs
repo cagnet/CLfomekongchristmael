@@ -8,31 +8,28 @@ using CustomerOrders.Business.Services;
 public sealed class OrdersController(OrderService service) : ControllerBase
 {
     [HttpGet]
-    public ActionResult<IEnumerable<Order>> ReadAll() => Ok(service.ReadAll());
+    public async Task<ActionResult<IEnumerable<Order>>> ReadAll(CancellationToken cancellationToken) => Ok(await service.ReadAll(cancellationToken));
 
-    [HttpGet("{id:int}")]
-    public ActionResult<Order> ReadOne(int id) => service.ReadOne(id) is { } order ? Ok(order) : NotFound();
+    [HttpGet("{id:int:min(1)}")]
+    public async Task<ActionResult<Order>> ReadOne(int id, CancellationToken cancellationToken) 
+        => await service.ReadOne(id, cancellationToken) is { } order ? Ok(order) : NotFound();
 
     [HttpPost("/customers/{customerId:int:min(1)}/orders")]
-    public ActionResult<Order> Create(int customerId, CreateOrder request)
+    public async Task<ActionResult<Order>> Create(int customerId, CreateOrder request, CancellationToken cancellationToken)
     {
-        var order = service.Create(customerId, request.Amount);
+        var order = await service.Create(customerId, request.Amount, cancellationToken);
         return CreatedAtAction(nameof(ReadOne), new { id = order.Id }, order);
     }
 
-    [HttpPatch("{id:int}")]
-    public ActionResult<Order> Update(int id, UpdateOrder request)
+    [HttpPatch("{id:int:min(1)}")]
+    public async Task<ActionResult<Order>> Update(int id, UpdateOrder request, CancellationToken cancellationToken)
     {
-        if (request.Amount is <= 0)
-        {
-            ModelState.AddModelError(nameof(request.Amount), "Amount must be greater than zero.");
-            return ValidationProblem(ModelState);
-        }
-
-        var order = service.Update(id, request.Amount);
+        
+        var order = await service.Update(id, request.Amount, cancellationToken);
         return order is null ? NotFound() : Ok(order);
     }
 
     [HttpDelete("{id:int}")]
-    public IActionResult Delete(int id) => service.Delete(id) ? NoContent() : NotFound();
+    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken) 
+        => await service.Delete(id, cancellationToken) ? NoContent() : NotFound();
 }

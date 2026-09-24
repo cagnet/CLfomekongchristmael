@@ -6,28 +6,28 @@ namespace CustomerOrders.Business.Services;
 
 public sealed class OrderService(ICustomerRepository customers, IOrderRepository orders)
 {
-    public IReadOnlyCollection<Order> ReadAll() => orders.GetAll();
-    public Order? ReadOne(int id) => orders.GetById(id);
+    public Task<IReadOnlyCollection<Order>> ReadAll(CancellationToken cancellationToken) => orders.GetAll(cancellationToken);
+    public Task<Order?> ReadOne(int id, CancellationToken cancellationToken) => orders.GetById(id, cancellationToken);
 
-    public Order Create(int customerId, decimal amount)
+    public async Task<Order> Create(int customerId, decimal amount, CancellationToken cancellationToken)
     {
-        var customer = customers.GetById(customerId);
+        var customer = await customers.GetById(customerId, cancellationToken);
         if (customer is null) 
             throw new CustomerNotFoundException(customerId);
         if (!customer.IsActive)
             throw new InactiveCustomerException("An order cannot be created for an inactive customer.");
-        return orders.Add(customerId, amount, DateTime.UtcNow);
+        return await orders.Add(customerId, amount, DateTime.UtcNow, cancellationToken);
     }
 
-    public Order? Update(int id, decimal? amount)
+    public async Task<Order?> Update(int id, decimal? amount, CancellationToken cancellationToken)
     {
-        var order = orders.GetById(id);
+        var order = await orders.GetById(id, cancellationToken);
         if (order is null) return null;
         if (amount is <= 0) throw new ArgumentOutOfRangeException(nameof(amount), "Amount must be greater than zero.");
-        order = order with { Amount = amount ?? order.Amount };
-        orders.Update(order);
+        order.Amount = amount ?? order.Amount;
+        await orders.Update(order, cancellationToken);
         return order;
     }
 
-    public bool Delete(int id) => orders.Delete(id);
+    public Task<bool> Delete(int id, CancellationToken cancellationToken) => orders.Delete(id, cancellationToken);
 }

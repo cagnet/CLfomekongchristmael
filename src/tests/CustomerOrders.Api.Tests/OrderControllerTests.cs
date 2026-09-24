@@ -1,6 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using CustomerOrders.Api.Tests.Helpers;
+using CustomerOrders.Business.Entities;
 using CustomerOrders.Business.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -11,9 +13,27 @@ public class OrderControllerTests(WebApplicationFactory<Program> webApplicationF
     : IClassFixture<WebApplicationFactory<Program>>
 {
 
-    private HttpClient _httpClient = webApplicationFactory.CreateClient();
+    private readonly HttpClient _httpClient = webApplicationFactory.CreateClient();
 
 
+    [Fact]
+    public async Task GetOneOrder_WhenOrderNotExists_ReturnNotFound()
+    {
+        const int id = 40000;
+        var response = await _httpClient.GetAsync($"orders/{id}");
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+    
+    [Fact]
+    public async Task GetOneOrder_WhenOrderExists_ReturnOk()
+    {
+        int customerId = await HttpHelpers.CreateCustomer(_httpClient, HttpHelpers.GenerateRandomString(8), true);
+        Order order = await CreateOrder(customerId, 6000);
+        var response = await _httpClient.GetAsync($"orders/{order.Id}");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+    
     [Fact]
     public async Task CreateOrder_WhenCustomerNotExists_Return400BadRequest()
     {
@@ -48,7 +68,7 @@ public class OrderControllerTests(WebApplicationFactory<Program> webApplicationF
     public async Task CreateOrder_WhenCustomerIsInative_Return400BadRequest()
     {
         // Let avoid mocking data for the moment
-        int id = await CreateCustomer("Mael", false);
+        int id = await HttpHelpers.CreateCustomer(_httpClient, "Mael", false);
         
         
         var response = await _httpClient.PostAsJsonAsync($"/customers/{id}/orders", new
@@ -66,7 +86,7 @@ public class OrderControllerTests(WebApplicationFactory<Program> webApplicationF
     [Fact]
     public async Task CreateOrder_WhenCustomerIsActiveAndRequestIsValid_Return201Created()
     {
-        int id = await CreateCustomer("Christ", true);
+        int id = await HttpHelpers.CreateCustomer(_httpClient, "Christ", true);
         var response = await _httpClient.PostAsJsonAsync($"/customers/{id}/orders", new
         {
             Amount = 10
@@ -75,34 +95,77 @@ public class OrderControllerTests(WebApplicationFactory<Program> webApplicationF
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
     }
 
-
-    private async Task<int> CreateCustomer(String name, bool isActive)
+    [Fact]
+    public async Task DeleteOrder_WhenOrderExists_ReturnNoContent()
     {
-        var createCustomerRes = await _httpClient.PostAsJsonAsync("/customers", new CreateCustomer(
-                Name: name,
-                IsActive: isActive,
-                FirstName: GenerateRandomString(6),
-                Email: $"{GenerateRandomString(10)}@gmail.com",
-                Address: GenerateRandomString(9)
-            ));
-        Assert.Equal(HttpStatusCode.Created, createCustomerRes.StatusCode);
-        var body = await createCustomerRes.Content.ReadAsStringAsync();
-        var rootElement = JsonDocument.Parse(body).RootElement;
-        return rootElement.GetProperty("id").GetInt32();
+        int customerId = await HttpHelpers.CreateCustomer(_httpClient, HttpHelpers.GenerateRandomString(8), true);
+        Order order = await CreateOrder(customerId, 100);
+
+        var response = await _httpClient.DeleteAsync($"/orders/{order.Id}");
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        
+    }
+    
+    [Fact]
+    public async Task DeleteOrder_WhenOrderNotExists_ReturnNotFound()
+    {
+        int customerId = await HttpHelpers.CreateCustomer(_httpClient, HttpHelpers.GenerateRandomString(8), true);
+        Order order = await CreateOrder(customerId, 100);
+
+        var response = await _httpClient.DeleteAsync($"/orders/{order.Id + 10000}");
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        
+    }
+    
+    [Fact]
+    public async Task UpdateOrder_WhenOrderNotExists_ReturnNotFound()
+    {
+        int customerId = await HttpHelpers.CreateCustomer(_httpClient, HttpHelpers.GenerateRandomString(8), true);
+        Order order = await CreateOrder(customerId, 100);
+
+        var response = await PatchAsync(_httpClient, $"/orders/{order.Id + 10000}", new UpdateOrder(Amount: 200));
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        
+    }
+    
+    [Fact]
+    public async Task UpdateOrder_WhenOrderExists_ReturnOk()
+    {
+        int customerId = await HttpHelpers.CreateCustomer(_httpClient, HttpHelpers.GenerateRandomString(8), true);
+        Order order = await CreateOrder(customerId, 100);
+
+        const int newAmount = 200;
+        var response = await PatchAsync(_httpClient, $"/orders/{order.Id}", new UpdateOrder(Amount: newAmount));
+        
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var body = await response.Content.ReadFromJsonAsync<Order>();
+        Assert.NotNull(body);
+        Assert.Equal(newAmount, body.Amount);
 
     }
+    
 
-    private String GenerateRandomString(int length)
+    private async Task<Order> CreateOrder(int customerId, decimal amount)
     {
-        string alphabet = "qwertyuiopasdfghjklzxcvbnm";
-        var words = new char[length];
-        var random = new Random();
-
-        for (int i = 0; i < length; i++)
+        var response = await _httpClient.PostAsJsonAsync($"/customers/{customerId}/orders", new
         {
-            words[i] = alphabet[random.Next(alphabet.Length)];
-        }
+            Amount = 10
+        });
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        Order? order =  await response.Content.ReadFromJsonAsync<Order>();
+        Assert.NotNull(order);
+        return order;
+    }
 
-        return new string(words);
+    
+
+    private async Task<HttpResponseMessage> PatchAsync<T>(HttpClient client, String url, T content)
+    {
+        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Patch, url)
+        {
+            Content = JsonContent.Create(content)
+        };
+        return await client.SendAsync(request);
     }
 }
