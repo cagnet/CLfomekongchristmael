@@ -4,11 +4,11 @@ namespace CustomerOrders.Business.Repositories;
 
 public interface IOrderRepository
 {
-    Task<IReadOnlyCollection<Order>> GetAll();
-    Task<IReadOnlyCollection<Order>> GetByCustomerId(int customerId);
-    Task<Order?> GetById(int id);
-    Task<Order> Add(int customerId, decimal amount, DateTime createdAt);
-    Task Update(Order order);
-    Task<bool> Delete(int id);
-    Task<bool> ExistsForCustomer(int customerId);
+    Task<IReadOnlyCollection<Order>> GetAll(CancellationToken cancellationToken);
+    Task<IReadOnlyCollection<Order>> GetByCustomerId(int customerId, CancellationToken cancellationToken);
+    Task<Order?> GetById(int id, CancellationToken cancellationToken);
+    Task<Order> Add(int customerId, decimal amount, DateTime createdAt, CancellationToken cancellationToken);
+    Task Update(Order order, CancellationToken cancellationToken);
+    Task<bool> Delete(int id, CancellationToken cancellationToken);
+    Task<bool> ExistsForCustomer(int customerId, CancellationToken cancellationToken);
 }

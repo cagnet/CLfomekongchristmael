@@ -4,10 +4,10 @@ namespace CustomerOrders.Business.Repositories;
 
 public interface ICustomerRepository
 {
-    Task<IReadOnlyCollection<Customer>> GetAll();
-    Task<Customer?> GetById(int id);
+    Task<IReadOnlyCollection<Customer>> GetAll(CancellationToken cancellationToken);
+    Task<Customer?> GetById(int id, CancellationToken cancellationToken);
     Task<Customer> Add(string name, string firstName, String email,
-        String address, bool isActive);
-    Task Update(Customer customer);
-    Task<bool> Delete(int id);
+        String address, bool isActive, CancellationToken cancellationToken);
+    Task Update(Customer customer, CancellationToken cancellationToken);
+    Task<bool> Delete(int id, CancellationToken cancellationToken);
 }

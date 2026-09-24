@@ -7,52 +7,53 @@ namespace CustomerOrders.Api.Database.Repositories;
 public class DurableOrderRepository(CustomerOrdersDbContext dbContext): IOrderRepository
     
 {
-    public async Task<IReadOnlyCollection<Order>> GetAll()
+    public async Task<IReadOnlyCollection<Order>> GetAll(CancellationToken cancellationToken)
     {
-        return (await dbContext.Orders.ToListAsync()).AsReadOnly();
+        return (await dbContext.Orders.ToListAsync(cancellationToken)).AsReadOnly();
     }
 
-    public async Task<IReadOnlyCollection<Order>> GetByCustomerId(int customerId)
+    public async Task<IReadOnlyCollection<Order>> GetByCustomerId(int customerId, CancellationToken cancellationToken)
     {
         return await dbContext.Orders.Where(o => o.CustomerId == customerId)
             .AsNoTracking()
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
 
-    public Task<Order?> GetById(int id)
+    public Task<Order?> GetById(int id, CancellationToken cancellationToken)
     {
         return dbContext.Orders
             .AsNoTracking()
-            .FirstOrDefaultAsync(o => o.Id == id);
+            .FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
     }
 
-    public async Task<Order> Add(int customerId, decimal amount, DateTime createdAt)
+    public async Task<Order> Add(int customerId, decimal amount, DateTime createdAt, CancellationToken cancellationToken)
     {
         var result = await dbContext.Orders.AddAsync(new Order()
         {
             CustomerId = customerId,
             Amount = amount,
             CreatedAt = createdAt
-        });
-        await dbContext.SaveChangesAsync();
+        }, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
         return result.Entity;
     }
 
-    public Task Update(Order order)
+    public Task Update(Order order, CancellationToken cancellationToken)
     {
-        return dbContext.SaveChangesAsync();
+        return dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<bool> Delete(int id)
+    public async Task<bool> Delete(int id, CancellationToken cancellationToken)
     {
-        var existingOrder = await dbContext.Orders.FirstOrDefaultAsync(c => c.Id == id);
+        var existingOrder = await dbContext.Orders.FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
         if (existingOrder is null) return false;
         dbContext.Orders.Remove(existingOrder);
+        await dbContext.SaveChangesAsync(cancellationToken);
         return true;
     }
 
-    public Task<bool> ExistsForCustomer(int customerId)
+    public Task<bool> ExistsForCustomer(int customerId, CancellationToken cancellationToken)
     {
-        return dbContext.Orders.AnyAsync(o => o.CustomerId == customerId);
+        return dbContext.Orders.AnyAsync(o => o.CustomerId == customerId, cancellationToken);
     }
 }

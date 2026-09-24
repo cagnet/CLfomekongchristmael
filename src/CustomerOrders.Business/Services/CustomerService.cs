@@ -6,33 +6,34 @@ namespace CustomerOrders.Business.Services;
 
 public sealed class CustomerService(ICustomerRepository customers, IOrderRepository orders)
 {
-    public Task<IReadOnlyCollection<Customer>> ReadAll() => customers.GetAll();
-    public Task<Customer?> ReadOne(int id) => customers.GetById(id);
-    public async Task<IReadOnlyCollection<Order>?> ReadOrders(int id) => await customers.GetById(id) is null ? null : await orders.GetByCustomerId(id);
+    public Task<IReadOnlyCollection<Customer>> ReadAll(CancellationToken cancellationToken) => customers.GetAll(cancellationToken);
+    public Task<Customer?> ReadOne(int id, CancellationToken cancellationToken) => customers.GetById(id, cancellationToken);
+    public async Task<IReadOnlyCollection<Order>?> ReadOrders(int id, CancellationToken cancellationToken) => await customers.GetById(id, cancellationToken) is null ?
+        null : await orders.GetByCustomerId(id, cancellationToken);
 
     public Task<Customer> Create(string name, string firstName, String email,
-        String address, bool isActive)
+        String address, bool isActive, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Name is required.", nameof(name));
         return customers.Add(name.Trim(), firstName.Trim(), email.Trim(),
-            address.Trim() ,isActive);
+            address.Trim() ,isActive, cancellationToken);
     }
 
-    public async Task<Customer?> Update(int id, string? name, bool? isActive)
+    public async Task<Customer?> Update(int id, string? name, bool? isActive, CancellationToken cancellationToken)
     {
-        var customer = await customers.GetById(id);
+        var customer = await customers.GetById(id, cancellationToken);
         if (customer is null) return null;
         if (name is not null && string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Name cannot be empty.", nameof(name));
         customer.Name = name?.Trim() ?? customer.Name;
         customer.IsActive = isActive ?? customer.IsActive;
-        await customers.Update(customer);
+        await customers.Update(customer, cancellationToken);
         return customer;
     }
 
-    public async Task<bool> Delete(int id)
+    public async Task<bool> Delete(int id, CancellationToken cancellationToken)
     {
-        if (await orders.ExistsForCustomer(id))
+        if (await orders.ExistsForCustomer(id, cancellationToken))
             throw new BusinessRuleException("customer_has_orders", "A customer with orders cannot be deleted.");
-        return await customers.Delete(id);
+        return await customers.Delete(id, cancellationToken);
     }
 }

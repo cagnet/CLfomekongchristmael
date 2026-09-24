@@ -11,35 +11,38 @@ namespace CustomerOrders.Api.Controllers;
 public sealed class CustomersController(CustomerService service) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Customer>>> ReadAll() => Ok(await service.ReadAll());
+    public async Task<ActionResult<IEnumerable<Customer>>> ReadAll(CancellationToken cancellationToken) => Ok(await service.ReadAll(cancellationToken));
 
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<Customer>> ReadOne(int id) => await service.ReadOne(id) is { } customer ? Ok(customer) : NotFound();
+    public async Task<ActionResult<Customer>> ReadOne(int id, CancellationToken cancellationToken) => 
+        await service.ReadOne(id, cancellationToken) is { } customer ? Ok(customer) : NotFound();
 
     [HttpGet("{id:int}/orders")]
-    public async Task<ActionResult<IEnumerable<Order>>> ReadOrders(int id) => await service.ReadOrders(id) is { } orders ? Ok(orders) : NotFound();
+    public async Task<ActionResult<IEnumerable<Order>>> ReadOrders(int id, CancellationToken cancellationToken) => 
+        await service.ReadOrders(id, cancellationToken) is { } orders ? Ok(orders) : NotFound();
 
     [HttpPost]
-    public async Task<ActionResult<Customer>> Create(CreateCustomer request)
+    public async Task<ActionResult<Customer>> Create(CreateCustomer request, CancellationToken cancellationToken)
     {
-        var customer = await service.Create(request.Name, request.FirstName, request.Email, request.Address, request.IsActive);
+        var customer = await service.Create(request.Name, request.FirstName, 
+            request.Email, request.Address, request.IsActive, cancellationToken);
         return CreatedAtAction(nameof(ReadOne), new { id = customer.Id }, customer);
     }
 
     [HttpPatch("{id:int}")]
-    public async Task<ActionResult<Customer>> Update(int id, UpdateCustomer request)
+    public async Task<ActionResult<Customer>> Update(int id, UpdateCustomer request, CancellationToken cancellationToken)
     {
 
-        var customer = await service.Update(id, request.Name, request.IsActive);
+        var customer = await service.Update(id, request.Name, request.IsActive, cancellationToken);
         return customer is null ? NotFound() : Ok(customer);
     }
 
     [HttpDelete("{id:int}")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {
         try
         {
-            return await service.Delete(id) ? NoContent() : NotFound();
+            return await service.Delete(id, cancellationToken) ? NoContent() : NotFound();
         }
         catch (BusinessRuleException exception)
         {
