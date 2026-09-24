@@ -1,10 +1,8 @@
-using CustomerOrders.Api.Database;
-using CustomerOrders.Api.Database.Repositories;
+
 using CustomerOrders.Api.Middlewares;
-using CustomerOrders.Business.Repositories;
-using CustomerOrders.Business.Services;
-using CustomerOrders.Data.InMemory;
-using Microsoft.EntityFrameworkCore;
+using CustomerOrders.Business;
+
+using CustomerOrders.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
@@ -13,15 +11,8 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new() { Title = "Customer Orders API", Version = "v1" });
 });
-builder.Services.AddSingleton<InMemoryDatabase>();
-builder.Services.AddDbContext<CustomerOrdersDbContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection"));
-});
-builder.Services.AddScoped<ICustomerRepository, DurableCustomerRepository>();
-builder.Services.AddScoped<IOrderRepository, DurableOrderRepository>();
-builder.Services.AddScoped<CustomerService>();
-builder.Services.AddScoped<OrderService>();
+builder.Services.AddApplication();
+builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("DbConnection")!);
 var app = builder.Build();
 
 app.UseMiddleware<GlobalExceptionMiddleware>();

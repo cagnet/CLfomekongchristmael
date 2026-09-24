@@ -2,7 +2,7 @@ using CustomerOrders.Business.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace CustomerOrders.Api.Database.Configurations;
+namespace CustomerOrders.Infrastructure.Persistence.Database.Configurations;
 
 public class OrderConfiguration: IEntityTypeConfiguration<Order>
 {

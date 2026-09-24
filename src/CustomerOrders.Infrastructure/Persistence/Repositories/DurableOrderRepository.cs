@@ -1,8 +1,9 @@
 using CustomerOrders.Business.Entities;
 using CustomerOrders.Business.Repositories;
+using CustomerOrders.Infrastructure.Persistence.Database;
 using Microsoft.EntityFrameworkCore;
 
-namespace CustomerOrders.Api.Database.Repositories;
+namespace CustomerOrders.Infrastructure.Persistence.Repositories;
 
 public class DurableOrderRepository(CustomerOrdersDbContext dbContext): IOrderRepository
     
