@@ -23,7 +23,7 @@ public sealed class CustomersController(CustomerService service) : ControllerBas
             ModelState.AddModelError(nameof(request.Name), "Name is required.");
         if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
-        var customer = service.Create(request.Name, request.IsActive);
+        var customer = service.Create(request.Name, request.FirstName, request.Email, request.Address, request.IsActive);
         return CreatedAtAction(nameof(ReadOne), new { id = customer.Id }, customer);
     }
 

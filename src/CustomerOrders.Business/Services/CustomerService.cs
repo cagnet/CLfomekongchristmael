@@ -10,10 +10,12 @@ public sealed class CustomerService(ICustomerRepository customers, IOrderReposit
     public Customer? ReadOne(int id) => customers.GetById(id);
     public IReadOnlyCollection<Order>? ReadOrders(int id) => customers.GetById(id) is null ? null : orders.GetByCustomerId(id);
 
-    public Customer Create(string name, bool isActive)
+    public Customer Create(string name, string firstName, String email,
+        String address, bool isActive)
     {
         if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Name is required.", nameof(name));
-        return customers.Add(name.Trim(), isActive);
+        return customers.Add(name.Trim(), firstName.Trim(), email.Trim(),
+            address.Trim() ,isActive);
     }
 
     public Customer? Update(int id, string? name, bool? isActive)

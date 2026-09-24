@@ -17,7 +17,7 @@ public class OrderControllerTests(WebApplicationFactory<Program> webApplicationF
     [Fact]
     public async Task CreateOrder_WhenCustomerNotExists_Return400BadRequest()
     {
-        var response = await _httpClient.PostAsJsonAsync("/customers/1/orders", new
+        var response = await _httpClient.PostAsJsonAsync("/customers/1000/orders", new
         {
             Amount = 10
         });
@@ -78,15 +78,31 @@ public class OrderControllerTests(WebApplicationFactory<Program> webApplicationF
 
     private async Task<int> CreateCustomer(String name, bool isActive)
     {
-        var createCustomerRes = await _httpClient.PostAsJsonAsync("/customers", new
-        {
-            Name = name,
-            IsActive = isActive
-        });
+        var createCustomerRes = await _httpClient.PostAsJsonAsync("/customers", new CreateCustomer(
+                Name: name,
+                IsActive: isActive,
+                FirstName: GenerateRandomString(6),
+                Email: $"{GenerateRandomString(10)}@gmail.com",
+                Address: GenerateRandomString(9)
+            ));
         Assert.Equal(HttpStatusCode.Created, createCustomerRes.StatusCode);
         var body = await createCustomerRes.Content.ReadAsStringAsync();
         var rootElement = JsonDocument.Parse(body).RootElement;
         return rootElement.GetProperty("id").GetInt32();
 
+    }
+
+    private String GenerateRandomString(int length)
+    {
+        string alphabet = "qwertyuiopasdfghjklzxcvbnm";
+        var words = new char[length];
+        var random = new Random();
+
+        for (int i = 0; i < length; i++)
+        {
+            words[i] = alphabet[random.Next(alphabet.Length)];
+        }
+
+        return new string(words);
     }
 }
