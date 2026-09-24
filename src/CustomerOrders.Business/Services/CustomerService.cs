@@ -33,7 +33,7 @@ public sealed class CustomerService(ICustomerRepository customers, IOrderReposit
     public async Task<bool> Delete(int id, CancellationToken cancellationToken)
     {
         if (await orders.ExistsForCustomer(id, cancellationToken))
-            throw new BusinessRuleException("customer_has_orders", "A customer with orders cannot be deleted.");
+            throw new BusinessConflictException(BusinessRuleCodes.Conflicts.CustomerHasOrders, "A customer with orders cannot be deleted.");
         return await customers.Delete(id, cancellationToken);
     }
 }

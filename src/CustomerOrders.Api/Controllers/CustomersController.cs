@@ -40,13 +40,7 @@ public sealed class CustomersController(CustomerService service) : ControllerBas
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {
-        try
-        {
-            return await service.Delete(id, cancellationToken) ? NoContent() : NotFound();
-        }
-        catch (BusinessRuleException exception)
-        {
-            return Conflict(new Problem(exception.Code, exception.Message));
-        }
+        return await service.Delete(id, cancellationToken) ? NoContent() : NotFound();
+
     }
 }
