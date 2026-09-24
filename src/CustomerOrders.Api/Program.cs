@@ -1,8 +1,10 @@
+using CustomerOrders.Api.Database;
+using CustomerOrders.Api.Database.Repositories;
 using CustomerOrders.Api.Middlewares;
 using CustomerOrders.Business.Repositories;
 using CustomerOrders.Business.Services;
 using CustomerOrders.Data.InMemory;
-using CustomerOrders.Data.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
@@ -12,8 +14,12 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new() { Title = "Customer Orders API", Version = "v1" });
 });
 builder.Services.AddSingleton<InMemoryDatabase>();
-builder.Services.AddSingleton<ICustomerRepository, CustomerRepository>();
-builder.Services.AddSingleton<IOrderRepository, OrderRepository>();
+builder.Services.AddDbContext<CustomerOrdersDbContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection"));
+});
+builder.Services.AddScoped<ICustomerRepository, DurableCustomerRepository>();
+builder.Services.AddScoped<IOrderRepository, DurableOrderRepository>();
 builder.Services.AddScoped<CustomerService>();
 builder.Services.AddScoped<OrderService>();
 var app = builder.Build();

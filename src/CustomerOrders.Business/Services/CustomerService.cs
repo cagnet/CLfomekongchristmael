@@ -6,11 +6,11 @@ namespace CustomerOrders.Business.Services;
 
 public sealed class CustomerService(ICustomerRepository customers, IOrderRepository orders)
 {
-    public IReadOnlyCollection<Customer> ReadAll() => customers.GetAll();
-    public Customer? ReadOne(int id) => customers.GetById(id);
-    public IReadOnlyCollection<Order>? ReadOrders(int id) => customers.GetById(id) is null ? null : orders.GetByCustomerId(id);
+    public Task<IReadOnlyCollection<Customer>> ReadAll() => customers.GetAll();
+    public Task<Customer?> ReadOne(int id) => customers.GetById(id);
+    public async Task<IReadOnlyCollection<Order>?> ReadOrders(int id) => await customers.GetById(id) is null ? null : await orders.GetByCustomerId(id);
 
-    public Customer Create(string name, string firstName, String email,
+    public Task<Customer> Create(string name, string firstName, String email,
         String address, bool isActive)
     {
         if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Name is required.", nameof(name));
@@ -18,20 +18,21 @@ public sealed class CustomerService(ICustomerRepository customers, IOrderReposit
             address.Trim() ,isActive);
     }
 
-    public Customer? Update(int id, string? name, bool? isActive)
+    public async Task<Customer?> Update(int id, string? name, bool? isActive)
     {
-        var customer = customers.GetById(id);
+        var customer = await customers.GetById(id);
         if (customer is null) return null;
         if (name is not null && string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Name cannot be empty.", nameof(name));
-        customer = customer with { Name = name?.Trim() ?? customer.Name, IsActive = isActive ?? customer.IsActive };
-        customers.Update(customer);
+        customer.Name = name?.Trim() ?? customer.Name;
+        customer.IsActive = isActive ?? customer.IsActive;
+        await customers.Update(customer);
         return customer;
     }
 
-    public bool Delete(int id)
+    public async Task<bool> Delete(int id)
     {
-        if (orders.ExistsForCustomer(id))
+        if (await orders.ExistsForCustomer(id))
             throw new BusinessRuleException("customer_has_orders", "A customer with orders cannot be deleted.");
-        return customers.Delete(id);
+        return await customers.Delete(id);
     }
 }
