@@ -11,10 +11,23 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new() { Title = "Customer Orders API", Version = "v1" });
 });
+
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+builder.Services.AddCors(ops =>
+{
+    ops.AddPolicy("FrontPolicy", policy =>
+    {
+        policy
+            .WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("DbConnection")!);
 var app = builder.Build();
-
+app.UseCors("FrontPolicy");
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseSwagger();
 app.UseSwaggerUI(options =>
