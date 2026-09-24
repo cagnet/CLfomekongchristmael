@@ -6,13 +6,13 @@ namespace CustomerOrders.Api.Tests.Helpers;
 
 public static class HttpHelpers
 {
-    public static async Task<int> CreateCustomer(HttpClient client, String name, bool isActive)
+    public static async Task<int> CreateCustomer(HttpClient client, String name, bool isActive, string email = null)
     {
         var createCustomerRes = await client.PostAsJsonAsync("/customers", new CreateCustomer(
             Name: name,
             IsActive: isActive,
             FirstName: GenerateRandomString(6),
-            Email: $"{GenerateRandomString(10)}@gmail.com",
+            Email: email ?? $"{GenerateRandomString(10)}@gmail.com",
             Address: GenerateRandomString(9)
         ));
         Assert.Equal(HttpStatusCode.Created, createCustomerRes.StatusCode);
@@ -34,5 +34,14 @@ public static class HttpHelpers
         }
 
         return new string(words);
+    }
+    
+    public static async Task<HttpResponseMessage> PatchAsync<T>(HttpClient client, String url, T content)
+    {
+        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Patch, url)
+        {
+            Content = JsonContent.Create(content)
+        };
+        return await client.SendAsync(request);
     }
 }

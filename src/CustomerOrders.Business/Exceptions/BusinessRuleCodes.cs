@@ -8,6 +8,7 @@ public static class BusinessRuleCodes
     public static class Conflicts
     {
         public const string CustomerHasOrders = "customer_has_orders";
+        public const string EmailAlreadyTaken = "email_is_already_taken";
     }
     
 }

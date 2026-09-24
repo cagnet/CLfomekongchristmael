@@ -1,4 +1,5 @@
 using CustomerOrders.Business.Entities;
+using CustomerOrders.Business.Exceptions;
 using CustomerOrders.Business.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,6 +24,12 @@ public class DurableCustomerRepository(CustomerOrdersDbContext dbContext):ICusto
     public async Task<Customer> Add(string name, string firstName, 
         string email, string address, bool isActive, CancellationToken cancellationToken)
     {
+        var existingCustomer =
+            await dbContext.Customers.FirstOrDefaultAsync(
+                c => c.Email.ToLower() == email.ToLower(), cancellationToken);
+        if (existingCustomer is not null)
+            throw new BusinessConflictException(BusinessRuleCodes.Conflicts.EmailAlreadyTaken,
+                "The email provided is already taken.");
         var result = await dbContext.Customers.AddAsync(new Customer()
         {
             Name = name,
@@ -30,7 +37,7 @@ public class DurableCustomerRepository(CustomerOrdersDbContext dbContext):ICusto
             Email = email,
             Address = address,
             IsActive = isActive
-        });
+        }, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
         return result.Entity;
     }

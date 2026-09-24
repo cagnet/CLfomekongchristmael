@@ -14,7 +14,6 @@ public sealed class CustomerService(ICustomerRepository customers, IOrderReposit
     public Task<Customer> Create(string name, string firstName, String email,
         String address, bool isActive, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Name is required.", nameof(name));
         return customers.Add(name.Trim(), firstName.Trim(), email.Trim(),
             address.Trim() ,isActive, cancellationToken);
     }
