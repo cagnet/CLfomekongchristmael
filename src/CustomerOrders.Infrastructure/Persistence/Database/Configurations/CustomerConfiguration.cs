@@ -1,4 +1,4 @@
-using CustomerOrders.Business.Entities;
+using CustomerOrders.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

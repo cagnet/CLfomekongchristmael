@@ -1,8 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
 using CustomerOrders.Api.Tests.Helpers;
-using CustomerOrders.Business.Entities;
-using CustomerOrders.Business.Exceptions;
+using CustomerOrders.Domain.Exceptions;
+using CustomerOrders.Domain.Models;
 using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace CustomerOrders.Api.Tests;

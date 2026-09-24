@@ -1,4 +1,4 @@
-using CustomerOrders.Business.Entities;
+using CustomerOrders.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace CustomerOrders.Infrastructure.Persistence.Database;

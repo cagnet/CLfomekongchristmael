@@ -1,4 +1,4 @@
-namespace CustomerOrders.Business.Exceptions;
+namespace CustomerOrders.Domain.Exceptions;
 
 public static class BusinessRuleCodes
 {

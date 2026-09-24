@@ -1,7 +1,6 @@
 using CustomerOrders.Business.Contracts;
-using CustomerOrders.Business.Entities;
-using CustomerOrders.Business.Exceptions;
-using CustomerOrders.Business.Repositories;
+using CustomerOrders.Domain.Exceptions;
+using CustomerOrders.Domain.Models;
 
 namespace CustomerOrders.Business.Services;
 

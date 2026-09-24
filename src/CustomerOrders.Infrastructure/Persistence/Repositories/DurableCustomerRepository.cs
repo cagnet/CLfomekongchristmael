@@ -1,6 +1,6 @@
 using CustomerOrders.Business.Contracts;
-using CustomerOrders.Business.Entities;
-using CustomerOrders.Business.Exceptions;
+using CustomerOrders.Domain.Exceptions;
+using CustomerOrders.Domain.Models;
 using CustomerOrders.Infrastructure.Persistence.Database;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,5 +1,6 @@
 
-using CustomerOrders.Business.Entities;
+
+using CustomerOrders.Domain.Models;
 
 namespace CustomerOrders.Business.Contracts;
 

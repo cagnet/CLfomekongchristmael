@@ -1,4 +1,4 @@
-namespace CustomerOrders.Business.Exceptions;
+namespace CustomerOrders.Domain.Exceptions;
 
 public class InactiveCustomerException(String message): 
     BusinessRuleException(BusinessRuleCodes.InactiveCustomer, message)

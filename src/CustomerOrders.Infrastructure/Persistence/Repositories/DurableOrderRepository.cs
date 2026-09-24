@@ -1,5 +1,6 @@
-using CustomerOrders.Business.Entities;
-using CustomerOrders.Business.Repositories;
+
+using CustomerOrders.Business.Contracts;
+using CustomerOrders.Domain.Models;
 using CustomerOrders.Infrastructure.Persistence.Database;
 using Microsoft.EntityFrameworkCore;
 

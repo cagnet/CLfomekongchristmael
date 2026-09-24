@@ -1,5 +1,4 @@
 using CustomerOrders.Business.Contracts;
-using CustomerOrders.Business.Repositories;
 using CustomerOrders.Infrastructure.Persistence.Database;
 using CustomerOrders.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;

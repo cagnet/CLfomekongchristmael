@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using CustomerOrders.Business.Entities;
+using CustomerOrders.Domain.Models;
 
 namespace CustomerOrders.Api.Tests.Helpers;
 
