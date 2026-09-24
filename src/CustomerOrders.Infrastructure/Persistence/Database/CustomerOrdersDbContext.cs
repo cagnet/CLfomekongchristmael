@@ -1,8 +1,7 @@
-using System.Reflection;
-using CustomerOrders.Business.Entities;
+using CustomerOrders.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace CustomerOrders.Api.Database;
+namespace CustomerOrders.Infrastructure.Persistence.Database;
 
 public class CustomerOrdersDbContext(DbContextOptions<CustomerOrdersDbContext> options): DbContext(options)
 {

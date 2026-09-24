@@ -1,9 +1,10 @@
-using CustomerOrders.Business.Entities;
-using CustomerOrders.Business.Exceptions;
-using CustomerOrders.Business.Repositories;
+using CustomerOrders.Business.Contracts;
+using CustomerOrders.Domain.Exceptions;
+using CustomerOrders.Domain.Models;
+using CustomerOrders.Infrastructure.Persistence.Database;
 using Microsoft.EntityFrameworkCore;
 
-namespace CustomerOrders.Api.Database.Repositories;
+namespace CustomerOrders.Infrastructure.Persistence.Repositories;
 
 public class DurableCustomerRepository(CustomerOrdersDbContext dbContext):ICustomerRepository
 {

@@ -1,8 +1,8 @@
-using CustomerOrders.Business.Entities;
+using CustomerOrders.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace CustomerOrders.Api.Database.Configurations;
+namespace CustomerOrders.Infrastructure.Persistence.Database.Configurations;
 
 public class CustomerConfiguration: IEntityTypeConfiguration<Customer>
 {

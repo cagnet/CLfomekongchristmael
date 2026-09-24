@@ -1,6 +1,7 @@
-using CustomerOrders.Business.Entities;
 
-namespace CustomerOrders.Business.Repositories;
+using CustomerOrders.Domain.Models;
+
+namespace CustomerOrders.Business.Contracts;
 
 public interface IOrderRepository
 {

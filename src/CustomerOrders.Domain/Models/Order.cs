@@ -1,4 +1,4 @@
-namespace CustomerOrders.Business.Entities;
+namespace CustomerOrders.Domain.Models;
 
 public class Order
 {

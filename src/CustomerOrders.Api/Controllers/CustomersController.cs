@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using CustomerOrders.Business.Entities;
-using CustomerOrders.Business.Exceptions;
 using CustomerOrders.Business.Services;
+using CustomerOrders.Domain.Models;
 
 namespace CustomerOrders.Api.Controllers;
 

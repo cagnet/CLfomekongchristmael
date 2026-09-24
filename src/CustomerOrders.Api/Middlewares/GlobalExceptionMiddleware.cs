@@ -1,4 +1,4 @@
-using CustomerOrders.Business.Exceptions;
+using CustomerOrders.Domain.Exceptions;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace CustomerOrders.Api.Middlewares;

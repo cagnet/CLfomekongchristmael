@@ -1,4 +1,4 @@
-namespace CustomerOrders.Business.Exceptions;
+namespace CustomerOrders.Domain.Exceptions;
 
 public class BusinessRuleException(string code, string message) : Exception(message)
 {
