@@ -12,7 +12,7 @@ public class OrderControllerTests(WebApplicationFactory<Program> webApplicationF
     : IClassFixture<WebApplicationFactory<Program>>
 {
 
-    private HttpClient _httpClient = webApplicationFactory.CreateClient();
+    private readonly HttpClient _httpClient = webApplicationFactory.CreateClient();
 
 
     [Fact]
