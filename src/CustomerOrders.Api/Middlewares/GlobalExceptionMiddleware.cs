@@ -20,7 +20,8 @@ public class GlobalExceptionMiddleware(RequestDelegate next)
                     await HandleBusinessRuleException(ex, context); 
                     break;
                 default:
-                    throw;
+                    await HandleUnknowException(e, context, logger);
+                    break;
             }
             
         }
@@ -31,6 +32,14 @@ public class GlobalExceptionMiddleware(RequestDelegate next)
     {
         context.Response.StatusCode = StatusCodes.Status400BadRequest;
         return context.Response.WriteAsJsonAsync(new Problem(ex.Code, ex.Message));
+    }
+
+    private Task HandleUnknowException(Exception ex, HttpContext context, ILogger<GlobalExceptionMiddleware> logger)
+    {
+        logger.LogError(ex, "@ An unexpected error occurs");
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        return context.Response.WriteAsJsonAsync(new Problem("internal_server_error", "Internal server error. Retry later !"));
+
     }
     
 }
