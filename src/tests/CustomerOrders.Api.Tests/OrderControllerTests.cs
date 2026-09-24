@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using CustomerOrders.Api.Tests.Helpers;
 using CustomerOrders.Business.Entities;
 using CustomerOrders.Business.Exceptions;
 using Microsoft.AspNetCore.Http;
@@ -26,7 +27,7 @@ public class OrderControllerTests(WebApplicationFactory<Program> webApplicationF
     [Fact]
     public async Task GetOneOrder_WhenOrderExists_ReturnOk()
     {
-        int customerId = await CreateCustomer(GenerateRandomString(8), true);
+        int customerId = await HttpHelpers.CreateCustomer(_httpClient, HttpHelpers.GenerateRandomString(8), true);
         Order order = await CreateOrder(customerId, 6000);
         var response = await _httpClient.GetAsync($"orders/{order.Id}");
 
@@ -67,7 +68,7 @@ public class OrderControllerTests(WebApplicationFactory<Program> webApplicationF
     public async Task CreateOrder_WhenCustomerIsInative_Return400BadRequest()
     {
         // Let avoid mocking data for the moment
-        int id = await CreateCustomer("Mael", false);
+        int id = await HttpHelpers.CreateCustomer(_httpClient, "Mael", false);
         
         
         var response = await _httpClient.PostAsJsonAsync($"/customers/{id}/orders", new
@@ -85,7 +86,7 @@ public class OrderControllerTests(WebApplicationFactory<Program> webApplicationF
     [Fact]
     public async Task CreateOrder_WhenCustomerIsActiveAndRequestIsValid_Return201Created()
     {
-        int id = await CreateCustomer("Christ", true);
+        int id = await HttpHelpers.CreateCustomer(_httpClient, "Christ", true);
         var response = await _httpClient.PostAsJsonAsync($"/customers/{id}/orders", new
         {
             Amount = 10
@@ -97,7 +98,7 @@ public class OrderControllerTests(WebApplicationFactory<Program> webApplicationF
     [Fact]
     public async Task DeleteOrder_WhenOrderExists_ReturnNoContent()
     {
-        int customerId = await CreateCustomer(GenerateRandomString(8), true);
+        int customerId = await HttpHelpers.CreateCustomer(_httpClient, HttpHelpers.GenerateRandomString(8), true);
         Order order = await CreateOrder(customerId, 100);
 
         var response = await _httpClient.DeleteAsync($"/orders/{order.Id}");
@@ -108,7 +109,7 @@ public class OrderControllerTests(WebApplicationFactory<Program> webApplicationF
     [Fact]
     public async Task DeleteOrder_WhenOrderNotExists_ReturnNotFound()
     {
-        int customerId = await CreateCustomer(GenerateRandomString(8), true);
+        int customerId = await HttpHelpers.CreateCustomer(_httpClient, HttpHelpers.GenerateRandomString(8), true);
         Order order = await CreateOrder(customerId, 100);
 
         var response = await _httpClient.DeleteAsync($"/orders/{order.Id + 10000}");
@@ -119,7 +120,7 @@ public class OrderControllerTests(WebApplicationFactory<Program> webApplicationF
     [Fact]
     public async Task UpdateOrder_WhenOrderNotExists_ReturnNotFound()
     {
-        int customerId = await CreateCustomer(GenerateRandomString(8), true);
+        int customerId = await HttpHelpers.CreateCustomer(_httpClient, HttpHelpers.GenerateRandomString(8), true);
         Order order = await CreateOrder(customerId, 100);
 
         var response = await PatchAsync(_httpClient, $"/orders/{order.Id + 10000}", new UpdateOrder(Amount: 200));
@@ -130,7 +131,7 @@ public class OrderControllerTests(WebApplicationFactory<Program> webApplicationF
     [Fact]
     public async Task UpdateOrder_WhenOrderExists_ReturnOk()
     {
-        int customerId = await CreateCustomer(GenerateRandomString(8), true);
+        int customerId = await HttpHelpers.CreateCustomer(_httpClient, HttpHelpers.GenerateRandomString(8), true);
         Order order = await CreateOrder(customerId, 100);
 
         const int newAmount = 200;
@@ -143,23 +144,7 @@ public class OrderControllerTests(WebApplicationFactory<Program> webApplicationF
         Assert.Equal(newAmount, body.Amount);
 
     }
-
-
-    private async Task<int> CreateCustomer(String name, bool isActive)
-    {
-        var createCustomerRes = await _httpClient.PostAsJsonAsync("/customers", new CreateCustomer(
-                Name: name,
-                IsActive: isActive,
-                FirstName: GenerateRandomString(6),
-                Email: $"{GenerateRandomString(10)}@gmail.com",
-                Address: GenerateRandomString(9)
-            ));
-        Assert.Equal(HttpStatusCode.Created, createCustomerRes.StatusCode);
-        var body = await createCustomerRes.Content.ReadAsStringAsync();
-        var rootElement = JsonDocument.Parse(body).RootElement;
-        return rootElement.GetProperty("id").GetInt32();
-
-    }
+    
 
     private async Task<Order> CreateOrder(int customerId, decimal amount)
     {
@@ -173,19 +158,7 @@ public class OrderControllerTests(WebApplicationFactory<Program> webApplicationF
         return order;
     }
 
-    private String GenerateRandomString(int length)
-    {
-        string alphabet = "qwertyuiopasdfghjklzxcvbnm";
-        var words = new char[length];
-        var random = new Random();
-
-        for (int i = 0; i < length; i++)
-        {
-            words[i] = alphabet[random.Next(alphabet.Length)];
-        }
-
-        return new string(words);
-    }
+    
 
     private async Task<HttpResponseMessage> PatchAsync<T>(HttpClient client, String url, T content)
     {
