@@ -18,7 +18,6 @@ public class DurableCustomerRepository(CustomerOrdersDbContext dbContext):ICusto
     public Task<Customer?> GetById(int id, CancellationToken cancellationToken)
     {
         return dbContext.Customers
-            .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 
